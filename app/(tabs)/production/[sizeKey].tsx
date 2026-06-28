@@ -2,8 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { FlatList, Modal, Pressable, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { TAB_BAR_BOTTOM_MARGIN, TAB_BAR_HEIGHT } from "../../../src/components/FloatingTabBar";
 import CollectionRow from "../../../src/components/CollectionRow";
-import { Colors } from "../../../src/constants/theme";
+import { Colors, Spacing } from "../../../src/constants/theme";
 import { EGG_SIZES, TRAY_SIZE, type SizeKey } from "../../../src/constants/sizes";
 import { useCollectionsForSize, useCreateCollection } from "../../../src/hooks/useProduction";
 import { useMonthStore } from "../../../src/stores/monthStore";
@@ -14,6 +16,8 @@ export default function SizeProductionDetailScreen() {
   const { sizeKey } = useLocalSearchParams<{ sizeKey: SizeKey }>();
   const month = useMonthStore((state) => state.month);
   const sizeDef = EGG_SIZES.find((s) => s.key === sizeKey);
+  const insets = useSafeAreaInsets();
+  const tabBarClearance = insets.bottom + TAB_BAR_BOTTOM_MARGIN + TAB_BAR_HEIGHT;
 
   const { data: collections = [] } = useCollectionsForSize(sizeKey, month);
   const createCollection = useCreateCollection(sizeKey, month);
@@ -58,7 +62,10 @@ export default function SizeProductionDetailScreen() {
       <FlatList
         data={collections}
         keyExtractor={(item) => item.localId}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: tabBarClearance + Spacing.xl },
+        ]}
         renderItem={({ item }) => (
           <CollectionRow
             date={item.collectionDate}
@@ -72,7 +79,10 @@ export default function SizeProductionDetailScreen() {
         }
       />
 
-      <Pressable style={styles.addButton} onPress={openModal}>
+      <Pressable
+        style={[styles.addButton, { bottom: tabBarClearance + Spacing.sm }]}
+        onPress={openModal}
+      >
         <Ionicons name="add" size={20} color={Colors.textOnGreen} />
         <Text style={styles.addButtonText}>Log Collection</Text>
       </Pressable>
