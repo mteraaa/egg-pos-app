@@ -1,21 +1,33 @@
 export const Colors = {
+  forest: "#006832",
+  leaf: "#2D8128",
+  lime: "#67A31C",
+  chartreuse: "#B8D30C",
+
   primary: "#2D8128",
-  primaryLight: "#3da137",
-  primaryDark: "#1f5c1c",
+  primaryDark: "#006832",
+  limeAccent: "#67A31C",
   white: "#FFFFFF",
-  background: "#F9FAF9",
+  background: "#FFFFFF",
   surface: "#FFFFFF",
-  border: "#E5EAE5",
-  textPrimary: "#1A1A1A",
+  border: "#E5E7EB",
+  mintFill: "#F2FBEC",
+  mintAccent: "#DDF3C9",
+  textPrimary: "#10271A",
   textSecondary: "#6B7280",
-  textMuted: "#9CA3AF",
+  textOnGreen: "#FFFFFF",
   success: "#2D8128",
+  successFill: "#DDF3C9",
   warning: "#F59E0B",
-  error: "#EF4444",
+  warningFill: "#FEF3C7",
+  error: "#DC2626",
+  errorFill: "#FEE2E2",
+  info: "#475569",
+  infoFill: "#F1F5F9",
 };
 
 export const Gradient = {
-  primary: ["#2D8128", "#3da137"] as const,
+  brand: ["#006832", "#2D8128", "#67A31C"] as const,
 };
 
 export const Typography = {
