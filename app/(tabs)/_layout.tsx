@@ -1,8 +1,15 @@
-import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { Tabs } from "expo-router";
+import { Tabs } from "expo-router/tabs";
 import { StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import {
+  FloatingTabBarBackground,
+  getFloatingTabBarStyle,
+  TabBarIcon,
+} from "../../src/components/FloatingTabBar";
 import MonthSwitcher from "../../src/components/MonthSwitcher";
 import { Colors, Gradient, Spacing, Typography } from "../../src/constants/theme";
 import { useMonthStore } from "../../src/stores/monthStore";
@@ -32,29 +39,32 @@ function Header() {
 }
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
         header: () => <Header />,
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textSecondary,
+        tabBarShowLabel: true,
         tabBarLabelStyle: {
           fontFamily: Typography.fontFamily.medium,
           fontSize: Typography.size.xs,
         },
-        tabBarStyle: {
-          height: 60,
-          paddingTop: Spacing.xs,
-          paddingBottom: Spacing.xs,
+        tabBarItemStyle: {
+          paddingTop: Spacing.sm,
         },
+        tabBarBackground: () => <FloatingTabBarBackground />,
+        tabBarStyle: getFloatingTabBarStyle(insets),
       }}
     >
       <Tabs.Screen
         name="dashboard"
         options={{
           title: "Dashboard",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="stats-chart" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabBarIcon name="stats-chart" color={color} size={size} focused={focused} />
           ),
         }}
       />
@@ -62,8 +72,8 @@ export default function TabsLayout() {
         name="sales"
         options={{
           title: "Sales",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="egg" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabBarIcon name="egg" color={color} size={size} focused={focused} />
           ),
         }}
       />
@@ -71,8 +81,8 @@ export default function TabsLayout() {
         name="production"
         options={{
           title: "Production",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="leaf" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabBarIcon name="leaf" color={color} size={size} focused={focused} />
           ),
         }}
       />
@@ -80,8 +90,8 @@ export default function TabsLayout() {
         name="expenses"
         options={{
           title: "Expenses",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="document-text" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabBarIcon name="document-text" color={color} size={size} focused={focused} />
           ),
         }}
       />

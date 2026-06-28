@@ -1,0 +1,119 @@
+import { StyleSheet } from "react-native";
+import { Colors, Radius, Spacing, Typography } from "../constants/theme";
+
+export const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: Spacing.md,
+  },
+  title: {
+    fontFamily: Typography.fontFamily.semibold,
+    fontSize: Typography.size.xl,
+    color: Colors.textPrimary,
+  },
+  listContent: {
+    paddingHorizontal: Spacing.md,
+    paddingBottom: 96,
+  },
+  separator: {
+    height: Spacing.sm,
+  },
+  empty: {
+    fontFamily: Typography.fontFamily.regular,
+    fontSize: Typography.size.base,
+    color: Colors.textSecondary,
+    textAlign: "center",
+    marginTop: Spacing.xl,
+  },
+  addButton: {
+    position: "absolute",
+    bottom: Spacing.lg,
+    right: Spacing.lg,
+    left: Spacing.lg,
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.full,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.xs,
+    paddingVertical: Spacing.sm + 4,
+  },
+  addButtonText: {
+    fontFamily: Typography.fontFamily.semibold,
+    fontSize: Typography.size.base,
+    color: Colors.textOnGreen,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+  },
+  modalCard: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: Radius.xl,
+    borderTopRightRadius: Radius.xl,
+    padding: Spacing.lg,
+    gap: Spacing.md,
+  },
+  modalTitle: {
+    fontFamily: Typography.fontFamily.semibold,
+    fontSize: Typography.size.lg,
+    color: Colors.textPrimary,
+  },
+  fieldRow: {
+    flexDirection: "row",
+    gap: Spacing.md,
+  },
+  field: {
+    flex: 1,
+    gap: Spacing.xs,
+  },
+  fieldLabel: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: Typography.size.sm,
+    color: Colors.textSecondary,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    fontFamily: Typography.fontFamily.regular,
+    fontSize: Typography.size.base,
+    color: Colors.textPrimary,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    marginTop: Spacing.sm,
+  },
+  modalButton: {
+    flex: 1,
+    borderRadius: Radius.md,
+    paddingVertical: Spacing.sm + 2,
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: Colors.mintFill,
+  },
+  cancelButtonText: {
+    fontFamily: Typography.fontFamily.semibold,
+    fontSize: Typography.size.base,
+    color: Colors.textSecondary,
+  },
+  saveButton: {
+    backgroundColor: Colors.primary,
+  },
+  saveButtonText: {
+    fontFamily: Typography.fontFamily.semibold,
+    fontSize: Typography.size.base,
+    color: Colors.textOnGreen,
+  },
+});

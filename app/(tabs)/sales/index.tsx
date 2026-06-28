@@ -7,6 +7,8 @@ import {
   Text,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { TAB_BAR_BOTTOM_MARGIN, TAB_BAR_HEIGHT } from "../../../src/components/FloatingTabBar";
 import SizeCard from "../../../src/components/SizeCard";
 import { Colors, Spacing, Typography } from "../../../src/constants/theme";
 import { useSalesCards, useUpdateSizePrice } from "../../../src/hooks/useSales";
@@ -17,6 +19,7 @@ export default function SalesScreen() {
   const { data: cards = [] } = useSalesCards(month);
   const updatePrice = useUpdateSizePrice(month);
   const [showHidden, setShowHidden] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const visibleCards = cards.filter(
     (card) => showHidden || card.sizeKey !== "cracked"
@@ -26,7 +29,10 @@ export default function SalesScreen() {
   return (
     <ScrollView
       style={styles.screen}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[
+        styles.content,
+        { paddingBottom: insets.bottom + TAB_BAR_BOTTOM_MARGIN + TAB_BAR_HEIGHT + Spacing.md },
+      ]}
     >
       <Text style={styles.title}>Sales</Text>
       <Text style={styles.subtitle}>Tap a size to view or log sales</Text>
