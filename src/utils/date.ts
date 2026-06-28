@@ -19,6 +19,11 @@ export function formatMonthLabel(month: string): string {
   return `${MONTH_NAMES[mon - 1]} ${year}`;
 }
 
+export function formatMonthAbbrev(month: string): string {
+  const [, mon] = month.split("-").map(Number);
+  return MONTH_NAMES[mon - 1].slice(0, 3);
+}
+
 export function todayDateKey(): string {
   return new Date().toISOString().slice(0, 10);
 }
