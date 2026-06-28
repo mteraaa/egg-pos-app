@@ -108,6 +108,19 @@ export async function listSalesBySizeAndMonth(
   return rows.map(toSale);
 }
 
+export async function sumSoldPiecesBySize(
+  uptoMonth: string
+): Promise<Map<SizeKey, number>> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<{ size_key: string; total: number }>(
+    `SELECT size_key, SUM(quantity_pieces) as total FROM sales
+     WHERE deleted = 0 AND substr(sale_date, 1, 7) <= ?
+     GROUP BY size_key;`,
+    [uptoMonth]
+  );
+  return new Map(rows.map((row) => [row.size_key as SizeKey, row.total]));
+}
+
 export async function updateSale(
   localId: string,
   patch: Partial<
