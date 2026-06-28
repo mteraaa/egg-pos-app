@@ -5,8 +5,10 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SplashScreen, Stack } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -17,6 +19,7 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
+  const [queryClient] = useState(() => new QueryClient());
 
   useEffect(() => {
     if (loaded) SplashScreen.hideAsync();
@@ -24,5 +27,11 @@ export default function RootLayout() {
 
   if (!loaded) return null;
 
-  return <Stack />;
+  return (
+    <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <Stack screenOptions={{ headerShown: false }} />
+      </QueryClientProvider>
+    </SafeAreaProvider>
+  );
 }
