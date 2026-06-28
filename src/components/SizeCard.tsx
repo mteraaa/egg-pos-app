@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Text, Pressable, StyleSheet, TextInput } from "react-native";
+import { Text, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { Colors, Typography, Spacing, Radius } from "../constants/theme";
 
 interface SizeCardBaseProps {
@@ -22,18 +22,78 @@ interface ProductionSizeCardProps extends SizeCardBaseProps {
   lowStockThreshold?: number;
 }
 
+interface ProductionContentProps extends ProductionSizeCardProps {
+  status: StockStatus;
+}
+
 type SizeCardProps = SalesSizeCardProps | ProductionSizeCardProps;
+
+type StockStatus = "ok" | "low" | "negative";
+
+function getStockStatus(
+  stockTrays: number,
+  lowStockThreshold: number
+): StockStatus {
+  if (stockTrays < 0) return "negative";
+  if (stockTrays <= lowStockThreshold) return "low";
+  return "ok";
+}
+
+const STATUS_CARD_FILL: Record<StockStatus, string> = {
+  ok: Colors.surface,
+  low: Colors.warningFill,
+  negative: Colors.errorFill,
+};
+
+const STATUS_BADGE_FILL: Record<StockStatus, string> = {
+  ok: Colors.infoFill,
+  low: Colors.warning,
+  negative: Colors.error,
+};
+
+const STATUS_BADGE_TEXT: Record<StockStatus, string> = {
+  ok: Colors.textSecondary,
+  low: Colors.textOnGreen,
+  negative: Colors.textOnGreen,
+};
+
+const STATUS_LABEL: Record<StockStatus, string> = {
+  ok: "OK",
+  low: "LOW",
+  negative: "NEGATIVE",
+};
 
 const SizeCard = (props: SizeCardProps) => {
   const { label, onPress } = props;
+  const status =
+    props.variant === "production"
+      ? getStockStatus(props.stockTrays, props.lowStockThreshold ?? 0)
+      : null;
 
   return (
-    <Pressable style={styles.card} onPress={onPress}>
-      <Text style={styles.size}>{label}</Text>
+    <Pressable
+      style={[
+        styles.card,
+        status ? { backgroundColor: STATUS_CARD_FILL[status] } : null,
+      ]}
+      onPress={onPress}
+    >
+      <View style={styles.headerRow}>
+        <Text style={styles.size}>{label}</Text>
+        {status && (
+          <View
+            style={[styles.badge, { backgroundColor: STATUS_BADGE_FILL[status] }]}
+          >
+            <Text style={[styles.badgeText, { color: STATUS_BADGE_TEXT[status] }]}>
+              {STATUS_LABEL[status]}
+            </Text>
+          </View>
+        )}
+      </View>
       {props.variant === "sales" ? (
         <SalesContent {...props} />
       ) : (
-        <ProductionContent {...props} />
+        <ProductionContent {...props} status={status!} />
       )}
     </Pressable>
   );
@@ -92,26 +152,28 @@ const SalesContent = ({
   );
 };
 
+const STATUS_VALUE_COLOR: Record<StockStatus, string> = {
+  ok: Colors.primaryDark,
+  low: Colors.warning,
+  negative: Colors.error,
+};
+
 const ProductionContent = ({
   stockTrays,
   collectedTrays,
-  lowStockThreshold = 0,
-}: ProductionSizeCardProps) => {
-  const stockColor =
-    stockTrays < 0
-      ? Colors.error
-      : stockTrays <= lowStockThreshold
-      ? Colors.warning
-      : Colors.primaryDark;
-
+  status,
+}: ProductionContentProps) => {
   return (
     <>
-      <Text style={[styles.primaryValue, { color: stockColor }]}>
+      <Text style={[styles.primaryValue, { color: STATUS_VALUE_COLOR[status] }]}>
         {stockTrays.toFixed(2)} trays
       </Text>
-      <Text style={styles.secondaryValue}>
-        +{collectedTrays.toFixed(2)} trays collected
-      </Text>
+      <Text style={styles.secondaryValue}>trays on hand</Text>
+      <View style={styles.collectedPill}>
+        <Text style={styles.collectedPillText}>
+          +{collectedTrays.toFixed(2)} collected
+        </Text>
+      </View>
     </>
   );
 };
@@ -123,10 +185,36 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     gap: Spacing.sm,
   },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   size: {
     fontFamily: Typography.fontFamily.semibold,
     fontSize: Typography.size.lg,
     color: Colors.textPrimary,
+  },
+  badge: {
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+  },
+  badgeText: {
+    fontFamily: Typography.fontFamily.semibold,
+    fontSize: Typography.size.xs,
+  },
+  collectedPill: {
+    alignSelf: "flex-start",
+    backgroundColor: Colors.mintFill,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+  },
+  collectedPillText: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: Typography.size.xs,
+    color: Colors.primary,
   },
   pricePill: {
     flexDirection: "row",
