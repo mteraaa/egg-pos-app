@@ -1,8 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { TAB_BAR_BOTTOM_MARGIN, TAB_BAR_HEIGHT } from "../../../src/components/FloatingTabBar";
 import SizeCard from "../../../src/components/SizeCard";
-import { Colors, Radius, Spacing, Typography } from "../../../src/constants/theme";
+import {
+  Colors,
+  Radius,
+  Spacing,
+  Typography,
+} from "../../../src/constants/theme";
 import { useProductionCards } from "../../../src/hooks/useProduction";
 import { useMonthStore } from "../../../src/stores/monthStore";
 
@@ -11,11 +18,18 @@ const LOW_STOCK_THRESHOLD = 2;
 export default function ProductionScreen() {
   const month = useMonthStore((state) => state.month);
   const { data: cards = [] } = useProductionCards(month);
+  const insets = useSafeAreaInsets();
 
   const negativeCards = cards.filter((card) => card.stockTrays < 0);
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[
+        styles.content,
+        { paddingBottom: insets.bottom + TAB_BAR_BOTTOM_MARGIN + TAB_BAR_HEIGHT + Spacing.md },
+      ]}
+    >
       <Text style={styles.title}>Production</Text>
       <Text style={styles.subtitle}>Stock on hand · collected this month</Text>
 
