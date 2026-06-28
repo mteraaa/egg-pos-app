@@ -9,8 +9,10 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { TAB_BAR_BOTTOM_MARGIN, TAB_BAR_HEIGHT } from "../../../src/components/FloatingTabBar";
 import TransactionRow from "../../../src/components/TransactionRow";
-import { Colors } from "../../../src/constants/theme";
+import { Colors, Spacing } from "../../../src/constants/theme";
 import { EGG_SIZES, TRAY_SIZE, type SizeKey } from "../../../src/constants/sizes";
 import {
   useCreateSale,
@@ -25,6 +27,8 @@ export default function SizeSalesDetailScreen() {
   const { sizeKey } = useLocalSearchParams<{ sizeKey: SizeKey }>();
   const month = useMonthStore((state) => state.month);
   const sizeDef = EGG_SIZES.find((s) => s.key === sizeKey);
+  const insets = useSafeAreaInsets();
+  const tabBarClearance = insets.bottom + TAB_BAR_BOTTOM_MARGIN + TAB_BAR_HEIGHT;
 
   const { data: sales = [] } = useSalesForSize(sizeKey, month);
   const { data: defaultPrice = 0 } = useSizePrice(sizeKey);
@@ -78,7 +82,10 @@ export default function SizeSalesDetailScreen() {
       <FlatList
         data={sales}
         keyExtractor={(item) => item.localId}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: tabBarClearance + Spacing.xl },
+        ]}
         renderItem={({ item }) => (
           <TransactionRow
             date={item.saleDate}
@@ -93,7 +100,10 @@ export default function SizeSalesDetailScreen() {
         }
       />
 
-      <Pressable style={styles.addButton} onPress={openModal}>
+      <Pressable
+        style={[styles.addButton, { bottom: tabBarClearance + Spacing.sm }]}
+        onPress={openModal}
+      >
         <Ionicons name="add" size={20} color={Colors.textOnGreen} />
         <Text style={styles.addButtonText}>Add Sale</Text>
       </Pressable>
