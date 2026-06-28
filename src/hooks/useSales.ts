@@ -91,3 +91,14 @@ export function useCreateSale(sizeKey: SizeKey, month: string) {
     },
   });
 }
+
+export function useCreateSaleForMonth(month: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateSaleInput) => createSale(input),
+    onSuccess: (_, input) => {
+      queryClient.invalidateQueries({ queryKey: ["sales", input.sizeKey, month] });
+      queryClient.invalidateQueries({ queryKey: ["sales-cards", month] });
+    },
+  });
+}
