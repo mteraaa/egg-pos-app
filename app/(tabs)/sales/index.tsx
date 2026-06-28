@@ -11,7 +11,10 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { TAB_BAR_BOTTOM_MARGIN, TAB_BAR_HEIGHT } from "../../../src/components/FloatingTabBar";
+import {
+  TAB_BAR_BOTTOM_MARGIN,
+  TAB_BAR_HEIGHT,
+} from "../../../src/components/FloatingTabBar";
 import SizeCard from "../../../src/components/SizeCard";
 import { TRAY_SIZE, type SizeKey } from "../../../src/constants/sizes";
 import { Colors, Spacing, Typography } from "../../../src/constants/theme";
@@ -40,7 +43,7 @@ export default function SalesScreen() {
   const [note, setNote] = useState("");
 
   const visibleCards = cards.filter(
-    (card) => showHidden || card.sizeKey !== "cracked"
+    (card) => showHidden || card.sizeKey !== "cracked",
   );
   const hasHiddenCard = cards.some((card) => card.sizeKey === "cracked");
 
@@ -82,7 +85,10 @@ export default function SalesScreen() {
       style={styles.screen}
       contentContainerStyle={[
         styles.content,
-        { paddingBottom: insets.bottom + TAB_BAR_BOTTOM_MARGIN + TAB_BAR_HEIGHT + Spacing.md },
+        {
+          paddingBottom:
+            insets.bottom + TAB_BAR_BOTTOM_MARGIN + TAB_BAR_HEIGHT + Spacing.md,
+        },
       ]}
     >
       <View style={styles.header}>
@@ -126,7 +132,6 @@ export default function SalesScreen() {
         <View style={detailStyles.modalOverlay}>
           <View style={detailStyles.modalCard}>
             <Text style={detailStyles.modalTitle}>Log Sale</Text>
-
             <View style={styles.sizeField}>
               <Text style={detailStyles.fieldLabel}>Size</Text>
               <View style={styles.sizeChipRow}>
@@ -187,7 +192,9 @@ export default function SalesScreen() {
             </View>
 
             <View style={detailStyles.field}>
-              <Text style={detailStyles.fieldLabel}>Customer note (optional)</Text>
+              <Text style={detailStyles.fieldLabel}>
+                Customer note (optional)
+              </Text>
               <TextInput
                 style={detailStyles.input}
                 value={note}
