@@ -22,3 +22,9 @@ export function formatMonthLabel(month: string): string {
 export function todayDateKey(): string {
   return new Date().toISOString().slice(0, 10);
 }
+
+export function formatShortDate(dateKey: string): string {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  return `${MONTH_NAMES[date.getMonth()].slice(0, 3)} ${date.getDate()}`;
+}
