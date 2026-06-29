@@ -1,3 +1,4 @@
+import "react-native-get-random-values";
 import {
   useFonts,
   Inter_400Regular,
