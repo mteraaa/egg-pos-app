@@ -2,14 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  Alert,
   FlatList,
-  Modal,
   Pressable,
   Text,
   TextInput,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import BottomSheetModal from "../../../src/components/BottomSheetModal";
 import { TAB_BAR_BOTTOM_MARGIN, TAB_BAR_HEIGHT } from "../../../src/components/FloatingTabBar";
 import TransactionRow from "../../../src/components/TransactionRow";
 import { Colors, Spacing } from "../../../src/constants/theme";
@@ -59,14 +60,22 @@ export default function SizeSalesDetailScreen() {
     const unitPrice = parseFloat(price) || 0;
     if (quantityPieces <= 0) return;
 
-    createSale.mutate({
-      sizeKey,
-      quantityPieces,
-      unitPrice,
-      customerNote: note.trim() ? note.trim() : null,
-      saleDate: todayDateKey(),
-    });
-    setModalVisible(false);
+    createSale.mutate(
+      {
+        sizeKey,
+        quantityPieces,
+        unitPrice,
+        customerNote: note.trim() ? note.trim() : null,
+        saleDate: todayDateKey(),
+      },
+      {
+        onSuccess: () => setModalVisible(false),
+        onError: (error) => {
+          console.error("Failed to save sale", error);
+          Alert.alert("Couldn't save sale", "Please try again.");
+        },
+      }
+    );
   };
 
   return (
@@ -108,10 +117,12 @@ export default function SizeSalesDetailScreen() {
         <Text style={styles.addButtonText}>Add Sale</Text>
       </Pressable>
 
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Log Sale — {sizeDef?.label}</Text>
+      <BottomSheetModal
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+        cardStyle={styles.modalCard}
+      >
+        <Text style={styles.modalTitle}>Log Sale — {sizeDef?.label}</Text>
 
             <View style={styles.fieldRow}>
               <View style={styles.field}>
@@ -170,9 +181,7 @@ export default function SizeSalesDetailScreen() {
                 <Text style={styles.saveButtonText}>Save</Text>
               </Pressable>
             </View>
-          </View>
-        </View>
-      </Modal>
+      </BottomSheetModal>
     </View>
   );
 }
