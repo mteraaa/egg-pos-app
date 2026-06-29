@@ -4,9 +4,11 @@ import IncomeExpenseChart from "../../src/components/charts/IncomeExpenseChart";
 import { TAB_BAR_BOTTOM_MARGIN, TAB_BAR_HEIGHT } from "../../src/components/FloatingTabBar";
 import KpiCard from "../../src/components/KpiCard";
 import ProfitBySizeCard from "../../src/components/ProfitBySizeCard";
+import SlideInView from "../../src/components/SlideInView";
 import { Colors, Spacing, Typography } from "../../src/constants/theme";
 import { useDashboard } from "../../src/hooks/useDashboard";
 import { useMonthStore } from "../../src/stores/monthStore";
+import { useScrollStore } from "../../src/stores/scrollStore";
 import { formatMonthAbbrev, shiftMonthKey } from "../../src/utils/date";
 
 function formatChange(value: number | null, unit: "%" | "pts"): string | null {
@@ -23,12 +25,17 @@ export default function DashboardScreen() {
   const caption = `vs ${formatMonthAbbrev(shiftMonthKey(month, -1))}`;
 
   return (
+    <SlideInView style={styles.screen}>
     <ScrollView
       style={styles.screen}
       contentContainerStyle={[
         styles.content,
         { paddingBottom: insets.bottom + TAB_BAR_BOTTOM_MARGIN + TAB_BAR_HEIGHT + Spacing.md },
       ]}
+      onScroll={(e) =>
+        useScrollStore.getState().onScroll(e.nativeEvent.contentOffset.y)
+      }
+      scrollEventThrottle={16}
     >
       {!data || !data.hasData ? (
         <View style={styles.emptyState}>
@@ -78,6 +85,7 @@ export default function DashboardScreen() {
         </>
       )}
     </ScrollView>
+    </SlideInView>
   );
 }
 

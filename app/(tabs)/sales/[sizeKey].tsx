@@ -17,12 +17,16 @@ import { Colors, Spacing } from "../../../src/constants/theme";
 import { EGG_SIZES, TRAY_SIZE, type SizeKey } from "../../../src/constants/sizes";
 import {
   useCreateSale,
+  useDeleteSale,
   useSalesForSize,
   useSizePrice,
+  useUpdateSale,
 } from "../../../src/hooks/useSales";
 import { useMonthStore } from "../../../src/stores/monthStore";
+import { useScrollStore } from "../../../src/stores/scrollStore";
 import { todayDateKey } from "../../../src/utils/date";
 import { styles } from "../../../src/screens/SalesDetailScreen.styles";
+import type { Sale } from "../../../src/types/db";
 
 export default function SizeSalesDetailScreen() {
   const { sizeKey } = useLocalSearchParams<{ sizeKey: SizeKey }>();
@@ -34,23 +38,56 @@ export default function SizeSalesDetailScreen() {
   const { data: sales = [] } = useSalesForSize(sizeKey, month);
   const { data: defaultPrice = 0 } = useSizePrice(sizeKey);
   const createSale = useCreateSale(sizeKey, month);
+  const updateSale = useUpdateSale(sizeKey, month);
+  const deleteSale = useDeleteSale(sizeKey, month);
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [editingSale, setEditingSale] = useState<Sale | null>(null);
   const [trays, setTrays] = useState("");
   const [pieces, setPieces] = useState("");
   const [price, setPrice] = useState("0");
   const [note, setNote] = useState("");
 
   useEffect(() => {
-    setPrice(String(defaultPrice));
-  }, [defaultPrice]);
+    if (!editingSale) setPrice(String(defaultPrice));
+  }, [defaultPrice, editingSale]);
 
   const openModal = () => {
+    setEditingSale(null);
     setTrays("");
     setPieces("");
     setPrice(String(defaultPrice));
     setNote("");
     setModalVisible(true);
+  };
+
+  const openEditModal = (sale: Sale) => {
+    setEditingSale(sale);
+    setTrays(String(Math.floor(sale.quantityPieces / TRAY_SIZE)));
+    setPieces(String(sale.quantityPieces % TRAY_SIZE));
+    setPrice(String(sale.unitPrice));
+    setNote(sale.customerNote ?? "");
+    setModalVisible(true);
+  };
+
+  const handleLongPress = (sale: Sale) => {
+    Alert.alert("Manage sale", undefined, [
+      { text: "Edit", onPress: () => openEditModal(sale) },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () =>
+          Alert.alert("Delete sale?", "This can't be undone.", [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Delete",
+              style: "destructive",
+              onPress: () => deleteSale.mutate(sale.localId),
+            },
+          ]),
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
   };
 
   const submit = () => {
@@ -59,6 +96,27 @@ export default function SizeSalesDetailScreen() {
     const quantityPieces = trayCount * TRAY_SIZE + pieceCount;
     const unitPrice = parseFloat(price) || 0;
     if (quantityPieces <= 0) return;
+
+    if (editingSale) {
+      updateSale.mutate(
+        {
+          localId: editingSale.localId,
+          patch: {
+            quantityPieces,
+            unitPrice,
+            customerNote: note.trim() ? note.trim() : null,
+          },
+        },
+        {
+          onSuccess: () => setModalVisible(false),
+          onError: (error) => {
+            console.error("Failed to update sale", error);
+            Alert.alert("Couldn't update sale", "Please try again.");
+          },
+        }
+      );
+      return;
+    }
 
     createSale.mutate(
       {
@@ -95,12 +153,17 @@ export default function SizeSalesDetailScreen() {
           styles.listContent,
           { paddingBottom: tabBarClearance + Spacing.xl },
         ]}
+        onScroll={(e) =>
+          useScrollStore.getState().onScroll(e.nativeEvent.contentOffset.y)
+        }
+        scrollEventThrottle={16}
         renderItem={({ item }) => (
           <TransactionRow
             date={item.saleDate}
             quantityPieces={item.quantityPieces}
             total={item.total}
             note={item.customerNote}
+            onLongPress={() => handleLongPress(item)}
           />
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -122,7 +185,9 @@ export default function SizeSalesDetailScreen() {
         onRequestClose={() => setModalVisible(false)}
         cardStyle={styles.modalCard}
       >
-        <Text style={styles.modalTitle}>Log Sale — {sizeDef?.label}</Text>
+        <Text style={styles.modalTitle}>
+          {editingSale ? "Edit Sale" : "Log Sale"} — {sizeDef?.label}
+        </Text>
 
             <View style={styles.fieldRow}>
               <View style={styles.field}>

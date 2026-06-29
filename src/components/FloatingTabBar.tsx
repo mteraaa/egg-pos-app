@@ -7,8 +7,20 @@ import { Colors, Radius, Spacing } from "../constants/theme";
 
 export const TAB_BAR_HEIGHT = 64;
 export const TAB_BAR_BOTTOM_MARGIN = Spacing.md;
-const TAB_BAR_MAX_WIDTH = 420;
-const TAB_BAR_SIDE_MARGIN_RATIO = 0.1;
+export const FAB_SIZE = TAB_BAR_HEIGHT;
+export const FAB_GAP = Spacing.sm;
+const TAB_BAR_MAX_WIDTH = 380;
+const TAB_BAR_SIDE_MARGIN_RATIO = 0.12;
+
+function getGroupLayout(screenWidth: number) {
+  const barWidth = Math.min(
+    screenWidth * (1 - TAB_BAR_SIDE_MARGIN_RATIO * 2),
+    TAB_BAR_MAX_WIDTH
+  );
+  const totalWidth = barWidth + FAB_GAP + FAB_SIZE;
+  const groupLeft = (screenWidth - totalWidth) / 2;
+  return { groupLeft, barWidth };
+}
 
 const styles = StyleSheet.create({
   blur: {
@@ -40,13 +52,12 @@ const styles = StyleSheet.create({
 });
 
 export function getFloatingTabBarStyle(insets: EdgeInsets, screenWidth: number) {
-  const barWidth = Math.min(screenWidth * (1 - TAB_BAR_SIDE_MARGIN_RATIO * 2), TAB_BAR_MAX_WIDTH);
-  const sideMargin = (screenWidth - barWidth) / 2;
+  const { groupLeft, barWidth } = getGroupLayout(screenWidth);
 
   return {
     position: "absolute" as const,
-    left: sideMargin,
-    right: sideMargin,
+    left: groupLeft,
+    width: barWidth,
     bottom: insets.bottom + TAB_BAR_BOTTOM_MARGIN,
     height: TAB_BAR_HEIGHT,
     borderRadius: Radius.full,
@@ -57,6 +68,18 @@ export function getFloatingTabBarStyle(insets: EdgeInsets, screenWidth: number) 
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.18,
     shadowRadius: 20,
+  };
+}
+
+export function getFabStyle(insets: EdgeInsets, screenWidth: number) {
+  const { groupLeft, barWidth } = getGroupLayout(screenWidth);
+
+  return {
+    position: "absolute" as const,
+    left: groupLeft + barWidth + FAB_GAP,
+    bottom: insets.bottom + TAB_BAR_BOTTOM_MARGIN,
+    width: FAB_SIZE,
+    height: FAB_SIZE,
   };
 }
 

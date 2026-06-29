@@ -1,17 +1,24 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { FlatList, Pressable, Text, TextInput, View } from "react-native";
+import { Alert, FlatList, Pressable, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheetModal from "../../../src/components/BottomSheetModal";
 import { TAB_BAR_BOTTOM_MARGIN, TAB_BAR_HEIGHT } from "../../../src/components/FloatingTabBar";
 import CollectionRow from "../../../src/components/CollectionRow";
 import { Colors, Spacing } from "../../../src/constants/theme";
 import { EGG_SIZES, TRAY_SIZE, type SizeKey } from "../../../src/constants/sizes";
-import { useCollectionsForSize, useCreateCollection } from "../../../src/hooks/useProduction";
+import {
+  useCollectionsForSize,
+  useCreateCollection,
+  useDeleteCollection,
+  useUpdateCollection,
+} from "../../../src/hooks/useProduction";
 import { useMonthStore } from "../../../src/stores/monthStore";
+import { useScrollStore } from "../../../src/stores/scrollStore";
 import { todayDateKey } from "../../../src/utils/date";
 import { styles } from "../../../src/screens/ProductionDetailScreen.styles";
+import type { EggCollection } from "../../../src/types/db";
 
 export default function SizeProductionDetailScreen() {
   const { sizeKey } = useLocalSearchParams<{ sizeKey: SizeKey }>();
@@ -22,17 +29,50 @@ export default function SizeProductionDetailScreen() {
 
   const { data: collections = [] } = useCollectionsForSize(sizeKey, month);
   const createCollection = useCreateCollection(sizeKey, month);
+  const updateCollection = useUpdateCollection(sizeKey, month);
+  const deleteCollection = useDeleteCollection(sizeKey, month);
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [editingCollection, setEditingCollection] =
+    useState<EggCollection | null>(null);
   const [trays, setTrays] = useState("");
   const [pieces, setPieces] = useState("");
   const [note, setNote] = useState("");
 
   const openModal = () => {
+    setEditingCollection(null);
     setTrays("");
     setPieces("");
     setNote("");
     setModalVisible(true);
+  };
+
+  const openEditModal = (collection: EggCollection) => {
+    setEditingCollection(collection);
+    setTrays(String(Math.floor(collection.quantityPieces / TRAY_SIZE)));
+    setPieces(String(collection.quantityPieces % TRAY_SIZE));
+    setNote(collection.note ?? "");
+    setModalVisible(true);
+  };
+
+  const handleLongPress = (collection: EggCollection) => {
+    Alert.alert("Manage collection", undefined, [
+      { text: "Edit", onPress: () => openEditModal(collection) },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () =>
+          Alert.alert("Delete collection?", "This can't be undone.", [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Delete",
+              style: "destructive",
+              onPress: () => deleteCollection.mutate(collection.localId),
+            },
+          ]),
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
   };
 
   const submit = () => {
@@ -40,6 +80,20 @@ export default function SizeProductionDetailScreen() {
     const pieceCount = parseInt(pieces, 10) || 0;
     const quantityPieces = trayCount * TRAY_SIZE + pieceCount;
     if (quantityPieces <= 0) return;
+
+    if (editingCollection) {
+      updateCollection.mutate(
+        {
+          localId: editingCollection.localId,
+          patch: {
+            quantityPieces,
+            note: note.trim() ? note.trim() : null,
+          },
+        },
+        { onSuccess: () => setModalVisible(false) }
+      );
+      return;
+    }
 
     createCollection.mutate({
       sizeKey,
@@ -67,11 +121,16 @@ export default function SizeProductionDetailScreen() {
           styles.listContent,
           { paddingBottom: tabBarClearance + Spacing.xl },
         ]}
+        onScroll={(e) =>
+          useScrollStore.getState().onScroll(e.nativeEvent.contentOffset.y)
+        }
+        scrollEventThrottle={16}
         renderItem={({ item }) => (
           <CollectionRow
             date={item.collectionDate}
             quantityPieces={item.quantityPieces}
             note={item.note}
+            onLongPress={() => handleLongPress(item)}
           />
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -93,7 +152,10 @@ export default function SizeProductionDetailScreen() {
         onRequestClose={() => setModalVisible(false)}
         cardStyle={styles.modalCard}
       >
-            <Text style={styles.modalTitle}>Log Collection — {sizeDef?.label}</Text>
+            <Text style={styles.modalTitle}>
+              {editingCollection ? "Edit Collection" : "Log Collection"} —{" "}
+              {sizeDef?.label}
+            </Text>
 
             <View style={styles.fieldRow}>
               <View style={styles.field}>

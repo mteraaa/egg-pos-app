@@ -1,6 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -16,6 +15,7 @@ import {
   TAB_BAR_HEIGHT,
 } from "../../../src/components/FloatingTabBar";
 import SizeCard from "../../../src/components/SizeCard";
+import SlideInView from "../../../src/components/SlideInView";
 import { TRAY_SIZE, type SizeKey } from "../../../src/constants/sizes";
 import { Colors, Spacing, Typography } from "../../../src/constants/theme";
 import {
@@ -24,6 +24,8 @@ import {
   useUpdateSizePrice,
 } from "../../../src/hooks/useSales";
 import { useMonthStore } from "../../../src/stores/monthStore";
+import { useQuickActionStore } from "../../../src/stores/quickActionStore";
+import { useScrollStore } from "../../../src/stores/scrollStore";
 import { todayDateKey } from "../../../src/utils/date";
 import { styles as detailStyles } from "../../../src/screens/SalesDetailScreen.styles";
 
@@ -33,7 +35,14 @@ export default function SalesScreen() {
   const updatePrice = useUpdateSizePrice(month);
   const createSale = useCreateSaleForMonth(month);
   const [showHidden, setShowHidden] = useState(false);
+  const [hiddenKeys, setHiddenKeys] = useState<Set<SizeKey>>(
+    () => new Set(["cracked" as SizeKey]),
+  );
   const insets = useSafeAreaInsets();
+  const pendingAction = useQuickActionStore((state) => state.pendingAction);
+  const clearPendingAction = useQuickActionStore(
+    (state) => state.clearPendingAction,
+  );
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedSizeKey, setSelectedSizeKey] = useState<SizeKey | null>(null);
@@ -43,9 +52,9 @@ export default function SalesScreen() {
   const [note, setNote] = useState("");
 
   const visibleCards = cards.filter(
-    (card) => showHidden || card.sizeKey !== "cracked",
+    (card) => showHidden || !hiddenKeys.has(card.sizeKey),
   );
-  const hasHiddenCard = cards.some((card) => card.sizeKey === "cracked");
+  const hasHiddenCard = cards.some((card) => hiddenKeys.has(card.sizeKey));
 
   const selectSize = (sizeKey: SizeKey, defaultPrice: number) => {
     setSelectedSizeKey(sizeKey);
@@ -61,6 +70,13 @@ export default function SalesScreen() {
     setNote("");
     setModalVisible(true);
   };
+
+  useEffect(() => {
+    if (pendingAction === "sale") {
+      openModal();
+      clearPendingAction();
+    }
+  }, [pendingAction]);
 
   const submit = () => {
     if (!selectedSizeKey) return;
@@ -81,24 +97,26 @@ export default function SalesScreen() {
   };
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={[
-        styles.content,
-        {
-          paddingBottom:
-            insets.bottom + TAB_BAR_BOTTOM_MARGIN + TAB_BAR_HEIGHT + Spacing.md,
-        },
-      ]}
-    >
+    <SlideInView style={styles.screen}>
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingBottom:
+              insets.bottom + TAB_BAR_BOTTOM_MARGIN + TAB_BAR_HEIGHT + Spacing.md,
+          },
+        ]}
+        onScroll={(e) =>
+          useScrollStore.getState().onScroll(e.nativeEvent.contentOffset.y)
+        }
+        scrollEventThrottle={16}
+      >
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Sales</Text>
           <Text style={styles.subtitle}>Tap a size to view or log sales</Text>
         </View>
-        <Pressable style={styles.addButton} onPress={openModal} hitSlop={8}>
-          <Ionicons name="add" size={24} color={Colors.textOnGreen} />
-        </Pressable>
       </View>
 
       <View style={styles.grid}>
@@ -114,6 +132,9 @@ export default function SalesScreen() {
                 updatePrice.mutate({ sizeKey: card.sizeKey, price })
               }
               onPress={() => router.push(`/(tabs)/sales/${card.sizeKey}`)}
+              onLongPress={() =>
+                setHiddenKeys((prev) => new Set(prev).add(card.sizeKey))
+              }
             />
           </View>
         ))}
@@ -136,7 +157,11 @@ export default function SalesScreen() {
             <Text style={detailStyles.modalTitle}>Log Sale</Text>
             <View style={styles.sizeField}>
               <Text style={detailStyles.fieldLabel}>Size</Text>
-              <View style={styles.sizeChipRow}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.sizeChipRow}
+              >
                 {visibleCards.map((card) => (
                   <Pressable
                     key={card.sizeKey}
@@ -157,7 +182,7 @@ export default function SalesScreen() {
                     </Text>
                   </Pressable>
                 ))}
-              </View>
+              </ScrollView>
             </View>
 
             <View style={detailStyles.fieldRow}>
@@ -220,7 +245,8 @@ export default function SalesScreen() {
               </Pressable>
             </View>
       </BottomSheetModal>
-    </ScrollView>
+      </ScrollView>
+    </SlideInView>
   );
 }
 
@@ -237,14 +263,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-  },
-  addButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
   },
   title: {
     fontFamily: Typography.fontFamily.bold,
@@ -284,7 +302,6 @@ const styles = StyleSheet.create({
   },
   sizeChipRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
     gap: Spacing.xs,
   },
   sizeChip: {
