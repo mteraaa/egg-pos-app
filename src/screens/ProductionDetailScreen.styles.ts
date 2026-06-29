@@ -49,17 +49,12 @@ export const styles = StyleSheet.create({
     fontSize: Typography.size.base,
     color: Colors.textOnGreen,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "flex-end",
-  },
   modalCard: {
     backgroundColor: Colors.surface,
     borderTopLeftRadius: Radius.xl,
     borderTopRightRadius: Radius.xl,
     padding: Spacing.lg,
-    gap: Spacing.md,
+    gap: Spacing.lg,
   },
   modalTitle: {
     fontFamily: Typography.fontFamily.semibold,
@@ -68,11 +63,11 @@ export const styles = StyleSheet.create({
   },
   fieldRow: {
     flexDirection: "row",
-    gap: Spacing.md,
+    gap: Spacing.lg,
   },
   field: {
     flex: 1,
-    gap: Spacing.xs,
+    gap: Spacing.sm,
   },
   fieldLabel: {
     fontFamily: Typography.fontFamily.medium,
@@ -84,9 +79,9 @@ export const styles = StyleSheet.create({
     borderColor: Colors.border,
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.sm + 4,
     fontFamily: Typography.fontFamily.regular,
-    fontSize: Typography.size.base,
+    fontSize: Typography.size.md,
     color: Colors.textPrimary,
   },
   modalActions: {
