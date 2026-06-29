@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import BottomSheetModal from "../../../src/components/BottomSheetModal";
 import {
   TAB_BAR_BOTTOM_MARGIN,
   TAB_BAR_HEIGHT,
@@ -128,9 +128,11 @@ export default function SalesScreen() {
         </Pressable>
       )}
 
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={detailStyles.modalOverlay}>
-          <View style={detailStyles.modalCard}>
+      <BottomSheetModal
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+        cardStyle={detailStyles.modalCard}
+      >
             <Text style={detailStyles.modalTitle}>Log Sale</Text>
             <View style={styles.sizeField}>
               <Text style={detailStyles.fieldLabel}>Size</Text>
@@ -217,9 +219,7 @@ export default function SalesScreen() {
                 <Text style={detailStyles.saveButtonText}>Save</Text>
               </Pressable>
             </View>
-          </View>
-        </View>
-      </Modal>
+      </BottomSheetModal>
     </ScrollView>
   );
 }

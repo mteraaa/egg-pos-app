@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { FlatList, Modal, Pressable, Text, TextInput, View } from "react-native";
+import { FlatList, Pressable, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import BottomSheetModal from "../../../src/components/BottomSheetModal";
 import { TAB_BAR_BOTTOM_MARGIN, TAB_BAR_HEIGHT } from "../../../src/components/FloatingTabBar";
 import CollectionRow from "../../../src/components/CollectionRow";
 import { Colors, Spacing } from "../../../src/constants/theme";
@@ -87,9 +88,11 @@ export default function SizeProductionDetailScreen() {
         <Text style={styles.addButtonText}>Log Collection</Text>
       </Pressable>
 
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
+      <BottomSheetModal
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+        cardStyle={styles.modalCard}
+      >
             <Text style={styles.modalTitle}>Log Collection — {sizeDef?.label}</Text>
 
             <View style={styles.fieldRow}>
@@ -139,9 +142,7 @@ export default function SizeProductionDetailScreen() {
                 <Text style={styles.saveButtonText}>Save</Text>
               </Pressable>
             </View>
-          </View>
-        </View>
-      </Modal>
+      </BottomSheetModal>
     </View>
   );
 }

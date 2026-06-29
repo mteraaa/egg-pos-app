@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Colors, Spacing } from "../constants/theme";
 import { styles as detailStyles } from "../screens/SalesDetailScreen.styles";
+import BottomSheetModal from "./BottomSheetModal";
 import { PRESET_ICON_OPTIONS } from "./PresetCard";
 
 export interface PresetInput {
@@ -39,9 +40,11 @@ const AddPresetModal = ({ visible, onClose, onSubmit }: AddPresetModalProps) => 
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={detailStyles.modalOverlay}>
-        <View style={detailStyles.modalCard}>
+    <BottomSheetModal
+      visible={visible}
+      onRequestClose={onClose}
+      cardStyle={detailStyles.modalCard}
+    >
           <Text style={detailStyles.modalTitle}>Add Recurring Expense</Text>
 
           <View style={detailStyles.field}>
@@ -98,9 +101,7 @@ const AddPresetModal = ({ visible, onClose, onSubmit }: AddPresetModalProps) => 
               <Text style={detailStyles.saveButtonText}>Save</Text>
             </Pressable>
           </View>
-        </View>
-      </View>
-    </Modal>
+    </BottomSheetModal>
   );
 };
 

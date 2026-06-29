@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Modal, Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
+import BottomSheetModal from "./BottomSheetModal";
 import { styles as detailStyles } from "../screens/SalesDetailScreen.styles";
 
 export interface OneOffInput {
@@ -38,9 +39,11 @@ const AddOneOffModal = ({ visible, onClose, onSubmit }: AddOneOffModalProps) => 
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={detailStyles.modalOverlay}>
-        <View style={detailStyles.modalCard}>
+    <BottomSheetModal
+      visible={visible}
+      onRequestClose={onClose}
+      cardStyle={detailStyles.modalCard}
+    >
           <Text style={detailStyles.modalTitle}>Add One-off Expense</Text>
 
           <View style={detailStyles.field}>
@@ -88,9 +91,7 @@ const AddOneOffModal = ({ visible, onClose, onSubmit }: AddOneOffModalProps) => 
               <Text style={detailStyles.saveButtonText}>Save</Text>
             </Pressable>
           </View>
-        </View>
-      </View>
-    </Modal>
+    </BottomSheetModal>
   );
 };
 
