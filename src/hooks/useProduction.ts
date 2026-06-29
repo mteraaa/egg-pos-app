@@ -3,11 +3,14 @@ import { EGG_SIZES, TRAY_SIZE, type SizeKey } from "../constants/sizes";
 import { sumSoldPiecesBySize } from "../lib/db/repositories/sales.repo";
 import {
   createCollection,
+  deleteCollection,
   listCollectionsByMonth,
   listCollectionsBySizeAndMonth,
   sumCollectedPiecesBySize,
+  updateCollection,
   type CreateCollectionInput,
 } from "../lib/db/repositories/collections.repo";
+import type { EggCollection } from "../types/db";
 
 export interface ProductionSizeCard {
   sizeKey: SizeKey;
@@ -64,6 +67,49 @@ export function useCreateCollection(sizeKey: SizeKey, month: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateCollectionInput) => createCollection(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["collections", sizeKey, month] });
+      queryClient.invalidateQueries({ queryKey: ["production-cards", month] });
+    },
+  });
+}
+
+export function useCreateCollectionForMonth(month: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateCollectionInput) => createCollection(input),
+    onSuccess: (_, input) => {
+      queryClient.invalidateQueries({
+        queryKey: ["collections", input.sizeKey, month],
+      });
+      queryClient.invalidateQueries({ queryKey: ["production-cards", month] });
+    },
+  });
+}
+
+export function useUpdateCollection(sizeKey: SizeKey, month: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      localId,
+      patch,
+    }: {
+      localId: string;
+      patch: Partial<
+        Pick<EggCollection, "quantityPieces" | "collectionDate" | "note">
+      >;
+    }) => updateCollection(localId, patch),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["collections", sizeKey, month] });
+      queryClient.invalidateQueries({ queryKey: ["production-cards", month] });
+    },
+  });
+}
+
+export function useDeleteCollection(sizeKey: SizeKey, month: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (localId: string) => deleteCollection(localId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["collections", sizeKey, month] });
       queryClient.invalidateQueries({ queryKey: ["production-cards", month] });

@@ -17,20 +17,29 @@ interface AddPresetModalProps {
   visible: boolean;
   onClose: () => void;
   onSubmit: (input: PresetInput) => void;
+  initialValues?: PresetInput | null;
 }
 
-const AddPresetModal = ({ visible, onClose, onSubmit }: AddPresetModalProps) => {
+const AddPresetModal = ({
+  visible,
+  onClose,
+  onSubmit,
+  initialValues,
+}: AddPresetModalProps) => {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [iconIndex, setIconIndex] = useState(0);
 
   useEffect(() => {
     if (visible) {
-      setName("");
-      setAmount("");
-      setIconIndex(0);
+      setName(initialValues?.name ?? "");
+      setAmount(initialValues ? String(initialValues.defaultAmount) : "");
+      const matchedIndex = initialValues
+        ? PRESET_ICON_OPTIONS.findIndex((opt) => opt.icon === initialValues.icon)
+        : -1;
+      setIconIndex(matchedIndex >= 0 ? matchedIndex : 0);
     }
-  }, [visible]);
+  }, [visible, initialValues]);
 
   const submit = () => {
     const parsedAmount = parseFloat(amount) || 0;
@@ -45,7 +54,9 @@ const AddPresetModal = ({ visible, onClose, onSubmit }: AddPresetModalProps) => 
       onRequestClose={onClose}
       cardStyle={detailStyles.modalCard}
     >
-          <Text style={detailStyles.modalTitle}>Add Recurring Expense</Text>
+          <Text style={detailStyles.modalTitle}>
+            {initialValues ? "Edit Recurring Expense" : "Add Recurring Expense"}
+          </Text>
 
           <View style={detailStyles.field}>
             <Text style={detailStyles.fieldLabel}>Name</Text>

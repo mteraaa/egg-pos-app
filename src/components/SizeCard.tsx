@@ -5,6 +5,7 @@ import { Colors, Typography, Spacing, Radius } from "../constants/theme";
 interface SizeCardBaseProps {
   label: string;
   onPress: () => void;
+  onLongPress?: () => void;
 }
 
 interface SalesSizeCardProps extends SizeCardBaseProps {
@@ -64,7 +65,7 @@ const STATUS_LABEL: Record<StockStatus, string> = {
 };
 
 const SizeCard = (props: SizeCardProps) => {
-  const { label, onPress } = props;
+  const { label, onPress, onLongPress } = props;
   const status =
     props.variant === "production"
       ? getStockStatus(props.stockTrays, props.lowStockThreshold ?? 0)
@@ -77,6 +78,8 @@ const SizeCard = (props: SizeCardProps) => {
         status ? { backgroundColor: STATUS_CARD_FILL[status] } : null,
       ]}
       onPress={onPress}
+      onLongPress={onLongPress}
+      delayLongPress={400}
     >
       <View style={styles.headerRow}>
         <Text style={styles.size}>{label}</Text>
@@ -181,6 +184,8 @@ const ProductionContent = ({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
     borderRadius: Radius.xl,
     padding: Spacing.md,
     gap: Spacing.sm,

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Colors, Typography } from "../constants/theme";
 import { formatShortDate } from "../utils/date";
 
@@ -6,17 +6,18 @@ interface OneOffRowProps {
   name: string | null;
   amount: number;
   expenseDate: string;
+  onLongPress?: () => void;
 }
 
-const OneOffRow = ({ name, amount, expenseDate }: OneOffRowProps) => {
+const OneOffRow = ({ name, amount, expenseDate, onLongPress }: OneOffRowProps) => {
   return (
-    <View style={styles.row}>
+    <Pressable style={styles.row} onLongPress={onLongPress} delayLongPress={400}>
       <View>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.date}>{formatShortDate(expenseDate)}</Text>
       </View>
       <Text style={styles.amount}>−₱{amount.toLocaleString()}</Text>
-    </View>
+    </Pressable>
   );
 };
 

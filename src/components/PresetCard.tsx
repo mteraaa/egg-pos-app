@@ -28,6 +28,7 @@ interface PresetCardProps {
   color: string | null;
   icon: string | null;
   onLog: () => void;
+  onLongPress?: () => void;
 }
 
 const PresetCard = ({
@@ -38,12 +39,17 @@ const PresetCard = ({
   color,
   icon,
   onLog,
+  onLongPress,
 }: PresetCardProps) => {
   const swatchColor = color ?? DEFAULT_ICON_OPTION.color;
   const iconName = (icon ?? DEFAULT_ICON_OPTION.icon) as keyof typeof Ionicons.glyphMap;
 
   return (
-    <View style={[styles.card, !isLogged && styles.cardPending]}>
+    <Pressable
+      style={[styles.card, !isLogged && styles.cardPending]}
+      onLongPress={onLongPress}
+      delayLongPress={400}
+    >
       <View style={[styles.iconSwatch, { backgroundColor: swatchColor }]}>
         <Ionicons name={iconName} size={20} color={Colors.textPrimary} />
       </View>
@@ -66,7 +72,7 @@ const PresetCard = ({
           <Text style={styles.logButtonText}>Log</Text>
         </Pressable>
       )}
-    </View>
+    </Pressable>
   );
 };
 

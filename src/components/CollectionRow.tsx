@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Colors, Radius, Spacing, Typography } from "../constants/theme";
 import { TRAY_SIZE } from "../constants/sizes";
 
@@ -6,19 +6,25 @@ interface CollectionRowProps {
   date: string;
   quantityPieces: number;
   note?: string | null;
+  onLongPress?: () => void;
 }
 
-const CollectionRow = ({ date, quantityPieces, note }: CollectionRowProps) => {
+const CollectionRow = ({
+  date,
+  quantityPieces,
+  note,
+  onLongPress,
+}: CollectionRowProps) => {
   const trays = quantityPieces / TRAY_SIZE;
 
   return (
-    <View style={styles.row}>
+    <Pressable style={styles.row} onLongPress={onLongPress} delayLongPress={400}>
       <View style={styles.left}>
         <Text style={styles.date}>{date}</Text>
         {note ? <Text style={styles.note}>{note}</Text> : null}
       </View>
       <Text style={styles.trays}>+{trays.toFixed(2)} trays</Text>
-    </View>
+    </Pressable>
   );
 };
 

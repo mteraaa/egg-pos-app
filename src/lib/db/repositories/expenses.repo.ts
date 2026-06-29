@@ -126,6 +126,30 @@ export async function listActivePresets(): Promise<ExpensePreset[]> {
   return rows.map(toExpensePreset);
 }
 
+export async function updatePreset(
+  localId: string,
+  patch: Partial<Pick<ExpensePreset, "name" | "defaultAmount" | "color" | "icon">>
+): Promise<void> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<ExpensePresetRow>(
+    "SELECT * FROM expense_presets WHERE local_id = ?;",
+    [localId]
+  );
+  if (!row) return;
+
+  const current = toExpensePreset(row);
+  const next = { ...current, ...patch };
+  const now = new Date().toISOString();
+
+  await db.runAsync(
+    `UPDATE expense_presets
+     SET name = ?, default_amount = ?, color = ?, icon = ?,
+         sync_status = 'pending', updated_at = ?
+     WHERE local_id = ?;`,
+    [next.name, next.defaultAmount, next.color, next.icon, now, localId]
+  );
+}
+
 export async function deletePreset(localId: string): Promise<void> {
   const db = await getDb();
   await db.runAsync(
@@ -219,6 +243,30 @@ export async function listExpensesByPreset(
     [presetId]
   );
   return rows.map(toExpense);
+}
+
+export async function updateExpense(
+  localId: string,
+  patch: Partial<Pick<Expense, "name" | "amount" | "note" | "expenseDate">>
+): Promise<void> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<ExpenseRow>(
+    "SELECT * FROM expenses WHERE local_id = ?;",
+    [localId]
+  );
+  if (!row) return;
+
+  const current = toExpense(row);
+  const next = { ...current, ...patch };
+  const now = new Date().toISOString();
+
+  await db.runAsync(
+    `UPDATE expenses
+     SET name = ?, amount = ?, note = ?, expense_date = ?,
+         sync_status = 'pending', updated_at = ?
+     WHERE local_id = ?;`,
+    [next.name, next.amount, next.note, next.expenseDate, now, localId]
+  );
 }
 
 export async function deleteExpense(localId: string): Promise<void> {

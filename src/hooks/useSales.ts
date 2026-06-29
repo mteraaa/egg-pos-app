@@ -2,10 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { EGG_SIZES, TRAY_SIZE, type SizeKey } from "../constants/sizes";
 import {
   createSale,
+  deleteSale,
   listSalesByMonth,
   listSalesBySizeAndMonth,
+  updateSale,
   type CreateSaleInput,
 } from "../lib/db/repositories/sales.repo";
+import type { Sale } from "../types/db";
 import {
   getAllPricing,
   getPricingBySizeKey,
@@ -88,6 +91,7 @@ export function useCreateSale(sizeKey: SizeKey, month: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sales", sizeKey, month] });
       queryClient.invalidateQueries({ queryKey: ["sales-cards", month] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 }
@@ -99,6 +103,39 @@ export function useCreateSaleForMonth(month: string) {
     onSuccess: (_, input) => {
       queryClient.invalidateQueries({ queryKey: ["sales", input.sizeKey, month] });
       queryClient.invalidateQueries({ queryKey: ["sales-cards", month] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+  });
+}
+
+export function useUpdateSale(sizeKey: SizeKey, month: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      localId,
+      patch,
+    }: {
+      localId: string;
+      patch: Partial<
+        Pick<Sale, "quantityPieces" | "unitPrice" | "customerNote" | "saleDate">
+      >;
+    }) => updateSale(localId, patch),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sales", sizeKey, month] });
+      queryClient.invalidateQueries({ queryKey: ["sales-cards", month] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+  });
+}
+
+export function useDeleteSale(sizeKey: SizeKey, month: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (localId: string) => deleteSale(localId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sales", sizeKey, month] });
+      queryClient.invalidateQueries({ queryKey: ["sales-cards", month] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 }

@@ -78,11 +78,13 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: Radius.md,
+    minHeight: 48,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm + 4,
     fontFamily: Typography.fontFamily.regular,
     fontSize: Typography.size.md,
     color: Colors.textPrimary,
+    textAlignVertical: "center",
   },
   modalActions: {
     flexDirection: "row",

@@ -2,8 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createExpense,
   createPreset,
+  deleteExpense,
+  deletePreset,
   listActivePresets,
   listExpensesByMonth,
+  updateExpense,
+  updatePreset,
   type CreateExpenseInput,
   type CreatePresetInput,
 } from "../lib/db/repositories/expenses.repo";
@@ -13,6 +17,7 @@ import { todayDateKey } from "../utils/date";
 export interface RecurringPresetCard extends ExpensePreset {
   isLogged: boolean;
   loggedAmount: number;
+  expense: Expense | null;
 }
 
 export interface ExpensesSummary {
@@ -27,7 +32,7 @@ async function fetchExpensesSummary(month: string): Promise<ExpensesSummary> {
     listExpensesByMonth(month),
   ]);
 
-  const loggedByPreset = new Map<string, number>();
+  const loggedByPreset = new Map<string, Expense>();
   const oneOffs: Expense[] = [];
   let totalThisMonth = 0;
 
@@ -36,20 +41,21 @@ async function fetchExpensesSummary(month: string): Promise<ExpensesSummary> {
     if (expense.isOneOff) {
       oneOffs.push(expense);
     } else if (expense.presetId) {
-      loggedByPreset.set(
-        expense.presetId,
-        (loggedByPreset.get(expense.presetId) ?? 0) + expense.amount
-      );
+      loggedByPreset.set(expense.presetId, expense);
     }
   }
 
   const recurring: RecurringPresetCard[] = presets
     .filter((preset) => preset.isRecurring)
-    .map((preset) => ({
-      ...preset,
-      isLogged: loggedByPreset.has(preset.localId),
-      loggedAmount: loggedByPreset.get(preset.localId) ?? preset.defaultAmount,
-    }));
+    .map((preset) => {
+      const expense = loggedByPreset.get(preset.localId) ?? null;
+      return {
+        ...preset,
+        isLogged: expense !== null,
+        loggedAmount: expense?.amount ?? preset.defaultAmount,
+        expense,
+      };
+    });
 
   return { totalThisMonth, recurring, oneOffs };
 }
@@ -73,6 +79,7 @@ export function useLogPreset(month: string) {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses-summary", month] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 }
@@ -93,6 +100,7 @@ export function useLogAllRecurring(month: string) {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses-summary", month] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 }
@@ -111,6 +119,59 @@ export function useCreateOneOffExpense(month: string) {
       } satisfies CreateExpenseInput),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses-summary", month] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+  });
+}
+
+export function useUpdateOneOffExpense(month: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      localId,
+      input,
+    }: {
+      localId: string;
+      input: { name: string; amount: number; note?: string | null };
+    }) =>
+      updateExpense(localId, {
+        name: input.name,
+        amount: input.amount,
+        note: input.note ?? null,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses-summary", month] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+  });
+}
+
+export function useUpdateLoggedExpense(month: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      localId,
+      amount,
+      note,
+    }: {
+      localId: string;
+      amount: number;
+      note?: string | null;
+    }) => updateExpense(localId, { amount, note: note ?? null }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses-summary", month] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+  });
+}
+
+export function useDeleteExpense(month: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (localId: string) => deleteExpense(localId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses-summary", month] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 }
@@ -119,6 +180,38 @@ export function useCreatePreset(month: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CreatePresetInput) => createPreset(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses-summary", month] });
+    },
+  });
+}
+
+export function useUpdatePreset(month: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      localId,
+      input,
+    }: {
+      localId: string;
+      input: CreatePresetInput;
+    }) =>
+      updatePreset(localId, {
+        name: input.name,
+        defaultAmount: input.defaultAmount,
+        color: input.color ?? null,
+        icon: input.icon ?? null,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses-summary", month] });
+    },
+  });
+}
+
+export function useDeletePreset(month: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (localId: string) => deletePreset(localId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses-summary", month] });
     },

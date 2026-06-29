@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Colors, Radius, Spacing, Typography } from "../constants/theme";
 import { TRAY_SIZE } from "../constants/sizes";
 
@@ -7,6 +7,7 @@ interface TransactionRowProps {
   quantityPieces: number;
   total: number;
   note?: string | null;
+  onLongPress?: () => void;
 }
 
 const TransactionRow = ({
@@ -14,18 +15,19 @@ const TransactionRow = ({
   quantityPieces,
   total,
   note,
+  onLongPress,
 }: TransactionRowProps) => {
   const trays = quantityPieces / TRAY_SIZE;
 
   return (
-    <View style={styles.row}>
+    <Pressable style={styles.row} onLongPress={onLongPress} delayLongPress={400}>
       <View style={styles.left}>
         <Text style={styles.date}>{date}</Text>
         <Text style={styles.trays}>{trays.toFixed(2)} trays</Text>
         {note ? <Text style={styles.note}>{note}</Text> : null}
       </View>
       <Text style={styles.total}>₱{total.toLocaleString()}</Text>
-    </View>
+    </Pressable>
   );
 };
 

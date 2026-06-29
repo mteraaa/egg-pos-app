@@ -13,20 +13,26 @@ interface AddOneOffModalProps {
   visible: boolean;
   onClose: () => void;
   onSubmit: (input: OneOffInput) => void;
+  initialValues?: OneOffInput | null;
 }
 
-const AddOneOffModal = ({ visible, onClose, onSubmit }: AddOneOffModalProps) => {
+const AddOneOffModal = ({
+  visible,
+  onClose,
+  onSubmit,
+  initialValues,
+}: AddOneOffModalProps) => {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
 
   useEffect(() => {
     if (visible) {
-      setName("");
-      setAmount("");
-      setNote("");
+      setName(initialValues?.name ?? "");
+      setAmount(initialValues ? String(initialValues.amount) : "");
+      setNote(initialValues?.note ?? "");
     }
-  }, [visible]);
+  }, [visible, initialValues]);
 
   const submit = () => {
     const parsedAmount = parseFloat(amount) || 0;
@@ -44,7 +50,9 @@ const AddOneOffModal = ({ visible, onClose, onSubmit }: AddOneOffModalProps) => 
       onRequestClose={onClose}
       cardStyle={detailStyles.modalCard}
     >
-          <Text style={detailStyles.modalTitle}>Add One-off Expense</Text>
+          <Text style={detailStyles.modalTitle}>
+            {initialValues ? "Edit One-off Expense" : "Add One-off Expense"}
+          </Text>
 
           <View style={detailStyles.field}>
             <Text style={detailStyles.fieldLabel}>Name</Text>

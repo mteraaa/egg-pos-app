@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 import {
   Animated,
+  Dimensions,
   Easing,
   Modal,
+  ScrollView,
   StyleSheet,
   View,
   type StyleProp,
@@ -43,8 +45,21 @@ export default function BottomSheetModal({
       onRequestClose={onRequestClose}
     >
       <View style={styles.overlay}>
-        <Animated.View style={[cardStyle, { transform: [{ translateY }] }]}>
-          {children}
+        <Animated.View
+          style={[
+            styles.sheet,
+            cardStyle,
+            styles.sheetClip,
+            { transform: [{ translateY }] },
+          ]}
+        >
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={cardStyle}
+          >
+            {children}
+          </ScrollView>
         </Animated.View>
       </View>
     </Modal>
@@ -56,5 +71,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "flex-end",
+  },
+  sheet: {
+    maxHeight: Dimensions.get("window").height * 0.85,
+  },
+  sheetClip: {
+    overflow: "hidden",
+    padding: 0,
+    gap: 0,
   },
 });
