@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { Tabs } from "expo-router/tabs";
-import { StyleSheet } from "react-native";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -40,6 +40,7 @@ function Header() {
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
 
   return (
     <Tabs
@@ -56,7 +57,7 @@ export default function TabsLayout() {
           paddingTop: Spacing.sm,
         },
         tabBarBackground: () => <FloatingTabBarBackground />,
-        tabBarStyle: getFloatingTabBarStyle(insets),
+        tabBarStyle: getFloatingTabBarStyle(insets, width),
       }}
     >
       <Tabs.Screen

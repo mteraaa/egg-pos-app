@@ -7,7 +7,8 @@ import { Colors, Radius, Spacing } from "../constants/theme";
 
 export const TAB_BAR_HEIGHT = 64;
 export const TAB_BAR_BOTTOM_MARGIN = Spacing.md;
-export const TAB_BAR_SIDE_MARGIN = Spacing.lg;
+const TAB_BAR_MAX_WIDTH = 420;
+const TAB_BAR_SIDE_MARGIN_RATIO = 0.1;
 
 const styles = StyleSheet.create({
   blur: {
@@ -21,7 +22,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
   },
   edgeHighlight: {
-    ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFillObject,
     borderRadius: Radius.full,
     borderWidth: 1,
     borderTopColor: "rgba(255, 255, 255, 0.85)",
@@ -38,11 +39,14 @@ const styles = StyleSheet.create({
   },
 });
 
-export function getFloatingTabBarStyle(insets: EdgeInsets) {
+export function getFloatingTabBarStyle(insets: EdgeInsets, screenWidth: number) {
+  const barWidth = Math.min(screenWidth * (1 - TAB_BAR_SIDE_MARGIN_RATIO * 2), TAB_BAR_MAX_WIDTH);
+  const sideMargin = (screenWidth - barWidth) / 2;
+
   return {
     position: "absolute" as const,
-    left: TAB_BAR_SIDE_MARGIN,
-    right: TAB_BAR_SIDE_MARGIN,
+    left: sideMargin,
+    right: sideMargin,
     bottom: insets.bottom + TAB_BAR_BOTTOM_MARGIN,
     height: TAB_BAR_HEIGHT,
     borderRadius: Radius.full,
@@ -61,7 +65,7 @@ export function FloatingTabBarBackground() {
     <BlurView
       intensity={80}
       tint="light"
-      blurMethod={Platform.OS === "android" ? "dimezisBlurView" : "none"}
+      experimentalBlurMethod={Platform.OS === "android" ? "dimezisBlurView" : "none"}
       style={styles.blur}
     >
       <LinearGradient
